@@ -251,20 +251,20 @@ export default function OnlineGamePage() {
   const isDraw = finished && room.winner === "draw";
 
   return (
-    <main className="min-h-[100dvh] flex flex-col">
-      <header className="sticky top-0 z-20 backdrop-blur-[10px] bg-[#fdf8ec]/85 border-b border-[#1e150e]/8">
-        <div className="max-w-[580px] mx-auto w-full px-4 py-2.5 flex items-center justify-between gap-2">
-          <Link href="/play/online" onClick={handleLeave} className="h-8 w-8 rounded-full bg-white border border-[#1e150e]/10 flex items-center justify-center">←</Link>
-          <button onClick={copyCode} className="flex-1 flex items-center justify-center gap-2 rounded-full bg-[#1e150e] text-[#fdf8ec] px-3 py-2 font-bold tracking-[0.18em] text-sm">
-            {code} <span className="text-xs font-medium tracking-normal bg-white/15 rounded-full px-2 py-0.5">{copied ? "Copied" : "Copy"}</span>
+    <main className="h-[100dvh] h-[100svh] overflow-hidden flex flex-col">
+      <header className="shrink-0 z-20 backdrop-blur-[10px] bg-[#fdf8ec]/85 border-b border-[#1e150e]/8">
+        <div className="max-w-[580px] mx-auto w-full px-3 sm:px-4 py-2 sm:py-2.5 flex items-center justify-between gap-2">
+          <Link href="/play/online" onClick={handleLeave} className="h-8 w-8 rounded-full bg-white border border-[#1e150e]/10 flex items-center justify-center shrink-0">←</Link>
+          <button onClick={copyCode} className="flex-1 flex items-center justify-center gap-2 rounded-full bg-[#1e150e] text-[#fdf8ec] px-3 py-1.5 sm:py-2 font-bold tracking-[0.18em] text-[13px] sm:text-sm">
+            {code} <span className="text-[11px] sm:text-xs font-medium tracking-normal bg-white/15 rounded-full px-2 py-0.5">{copied ? "Copied" : "Copy"}</span>
           </button>
-          <button onClick={() => { const nv = !muted; setMuted(nv); localStorage.setItem("vibe-four:muted", nv ? "1" : "0"); }} className="h-8 w-8 rounded-full bg-white border border-[#1e150e]/10 flex items-center justify-center text-sm">{muted ? "·" : "♪"}</button>
+          <button onClick={() => { const nv = !muted; setMuted(nv); localStorage.setItem("vibe-four:muted", nv ? "1" : "0"); }} className="h-8 w-8 rounded-full bg-white border border-[#1e150e]/10 flex items-center justify-center text-sm shrink-0">{muted ? "·" : "♪"}</button>
         </div>
       </header>
 
-      <div className="flex-1 max-w-[580px] w-full mx-auto px-4 py-4 flex flex-col">
+      <div className="flex-1 min-h-0 max-w-[580px] w-full mx-auto px-3 sm:px-4 py-2 sm:py-3 flex flex-col overflow-hidden">
         {/* players + scores */}
-        <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
+        <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center shrink-0">
           {[0, 1].map((idx) => {
             const p = room.players[idx];
             const num = (idx + 1) as 1 | 2;
@@ -293,61 +293,61 @@ export default function OnlineGamePage() {
             <div className="text-[11px] text-[#8c7a60] tabular-nums">{room.scores?.draws ? `${room.scores.draws} draw${room.scores.draws !== 1 ? "s" : ""}` : ""}</div>
           </div>
         </div>
-        {joining && <div className="mt-3 text-center text-xs text-[#8c7a60] flex items-center justify-center gap-2"><span className="h-3 w-3 rounded-full border-2 border-[#1e150e]/20 border-t-[#1e150e] animate-spin" /> Joining…</div>}
+        {joining && <div className="mt-2 text-center text-xs text-[#8c7a60] flex items-center justify-center gap-2 shrink-0"><span className="h-3 w-3 rounded-full border-2 border-[#1e150e]/20 border-t-[#1e150e] animate-spin" /> Joining…</div>}
 
-        <div className="mt-4">
+        <div className="mt-2 sm:mt-3 shrink-0">
           <AnimatePresence mode="wait">
             {abandoned ? (
-              <motion.div key="abandoned" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="rounded-[14px] bg-[#dc2626]/10 border border-[#dc2626]/15 px-4 py-3 text-center">
-                <div className="text-sm font-semibold text-[#7f1d1d]">Opponent left</div>
-                <div className="text-xs text-[#8c7a60] mt-0.5">They’ve been removed from this room. The room will be deleted when you leave.</div>
-                <div className="mt-3 flex gap-2 justify-center">
-                  <Link href="/play/online" onClick={handleLeave} className="rounded-full bg-[#1e150e] text-white px-4 py-2 text-sm font-semibold">Leave</Link>
-                  <button onClick={copyLink} className="rounded-full bg-white border border-[#1e150e]/10 px-4 py-2 text-sm font-medium">Invite someone else</button>
+              <motion.div key="abandoned" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="rounded-[12px] bg-[#dc2626]/10 border border-[#dc2626]/15 px-3 py-2.5 text-center">
+                <div className="text-[13px] font-semibold text-[#7f1d1d]">Opponent left</div>
+                <div className="text-[11px] text-[#8c7a60] mt-0.5">Room closes when you leave.</div>
+                <div className="mt-2 flex gap-2 justify-center">
+                  <Link href="/play/online" onClick={handleLeave} className="rounded-full bg-[#1e150e] text-white px-3.5 py-1.5 text-xs font-semibold">Leave</Link>
+                  <button onClick={copyLink} className="rounded-full bg-white border border-[#1e150e]/10 px-3.5 py-1.5 text-xs font-medium">Invite</button>
                 </div>
               </motion.div>
             ) : disconnected ? (
-              <motion.div key="disc" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-[14px] bg-amber-50 border border-amber-200 px-4 py-3 text-center">
-                <div className="text-sm font-semibold text-amber-900">Opponent disconnected</div>
-                <div className="text-xs text-amber-700 mt-0.5">Reconnecting… if they don’t return in a few seconds, you can leave.</div>
+              <motion.div key="disc" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-[12px] bg-amber-50 border border-amber-200 px-3 py-2.5 text-center">
+                <div className="text-[13px] font-semibold text-amber-900">Opponent disconnected</div>
+                <div className="text-[11px] text-amber-700 mt-0.5">Reconnecting…</div>
               </motion.div>
             ) : waiting ? (
-              <motion.div key="waiting" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="rounded-[14px] bg-white border border-[#1e150e]/10 px-4 py-3 text-center">
-                <div className="text-sm font-semibold">Waiting for opponent</div>
-                <div className="text-xs text-[#8c7a60] mt-1">Share code <span className="font-mono font-bold text-[#1e150e]">{code}</span> or send link</div>
-                <div className="mt-3 flex gap-2 justify-center">
-                  <button onClick={copyCode} className="rounded-full bg-[#1e150e] text-white px-4 py-2 text-sm font-semibold">Copy code</button>
-                  <button onClick={copyLink} className="rounded-full bg-white border border-[#1e150e]/10 px-4 py-2 text-sm font-medium">Copy link</button>
+              <motion.div key="waiting" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="rounded-[12px] bg-white border border-[#1e150e]/10 px-3 py-2.5 text-center">
+                <div className="text-[13px] font-semibold">Waiting for opponent</div>
+                <div className="text-[11px] text-[#8c7a60] mt-0.5">Share <span className="font-mono font-bold text-[#1e150e]">{code}</span></div>
+                <div className="mt-2 flex gap-2 justify-center">
+                  <button onClick={copyCode} className="rounded-full bg-[#1e150e] text-white px-3.5 py-1.5 text-xs font-semibold">Copy code</button>
+                  <button onClick={copyLink} className="rounded-full bg-white border border-[#1e150e]/10 px-3.5 py-1.5 text-xs font-medium">Copy link</button>
                 </div>
               </motion.div>
             ) : finished ? (
-              <motion.div key="finished" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`rounded-[14px] px-4 py-3 text-center border font-semibold ${isDraw ? "bg-white border-[#1e150e]/10" : iWon ? "bg-[#5cc87a]/10 border-[#5cc87a]/15 text-[#14532d]" : "bg-[#fdf8ec] border-[#1e150e]/10"}`}>
+              <motion.div key="finished" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`rounded-[12px] px-3 py-2.5 text-center border font-semibold text-sm ${isDraw ? "bg-white border-[#1e150e]/10" : iWon ? "bg-[#5cc87a]/10 border-[#5cc87a]/15 text-[#14532d]" : "bg-[#fdf8ec] border-[#1e150e]/10"}`}>
                 {isDraw ? "Draw." : iWon ? "You win." : `${opponent?.name || "Opponent"} wins.`}
                 <div className="mt-2 flex gap-2 justify-center font-medium">
-                  <button onClick={handleRematch} className="rounded-full bg-[#1e150e] text-white px-5 py-2 text-sm font-semibold">{room.rematchRequests.includes(getToken()) ? "Waiting…" : "Rematch"}</button>
-                  <Link href="/play/online" className="rounded-full bg-white border border-[#1e150e]/10 px-5 py-2 text-sm">Lobby</Link>
+                  <button onClick={handleRematch} className="rounded-full bg-[#1e150e] text-white px-4 py-1.5 text-xs font-semibold">{room.rematchRequests.includes(getToken()) ? "Waiting…" : "Rematch"}</button>
+                  <Link href="/play/online" className="rounded-full bg-white border border-[#1e150e]/10 px-4 py-1.5 text-xs">Lobby</Link>
                 </div>
-                {room.rematchRequests.length > 0 && room.rematchRequests.length < 2 && <div className="mt-2 text-xs font-normal text-[#8c7a60]">{room.rematchRequests.length}/2 requested</div>}
+                {room.rematchRequests.length > 0 && room.rematchRequests.length < 2 && <div className="mt-1.5 text-[11px] font-normal text-[#8c7a60]">{room.rematchRequests.length}/2 requested</div>}
               </motion.div>
             ) : (
-              <motion.div key="playing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`rounded-full mx-auto w-fit px-4 py-1.5 text-sm font-medium border flex items-center gap-2 ${isMyTurn ? "bg-[#5cc87a]/10 border-[#5cc87a]/15 text-[#14532d]" : "bg-white border-[#1e150e]/10 text-[#8c7a60]"}`}>
+              <motion.div key="playing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`rounded-full mx-auto w-fit px-3 py-1 text-[12px] sm:text-sm font-medium border flex items-center gap-1.5 ${isMyTurn ? "bg-[#5cc87a]/10 border-[#5cc87a]/15 text-[#14532d]" : "bg-white border-[#1e150e]/10 text-[#8c7a60]"}`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${isMyTurn ? "bg-[#5cc87a]" : "bg-[#8c7a60]"}`} />
-                {isMyTurn ? "Your turn" : `${room.players[room.currentPlayer - 1]?.name || "Opponent"}’s turn`}
+                {isMyTurn ? "Your turn — drag to aim" : `${room.players[room.currentPlayer - 1]?.name || "Opponent"}’s turn`}
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {error && <div className="mt-3 rounded-[12px] bg-[#dc2626]/10 border border-[#dc2626]/15 px-4 py-2.5 text-sm text-[#7f1d1d]">{error}</div>}
+        {error && <div className="mt-2 rounded-[10px] bg-[#dc2626]/10 border border-[#dc2626]/15 px-3 py-2 text-xs sm:text-sm text-[#7f1d1d] shrink-0">{error}</div>}
 
-        <div className="mt-4">
+        <div className="flex-1 min-h-0 flex items-center justify-center py-1 sm:py-2">
           <GameBoard board={room.board} currentPlayer={room.currentPlayer} winningLine={room.winningLine || []} onColumnClick={handleColumn} disabled={!isMyTurn || !!finished || !!abandoned || waiting || moveLoading} lastMove={lastMove} />
         </div>
 
-        <div className="mt-4 flex items-center justify-between">
-          <button onClick={fetchRoom} className="rounded-full bg-white border border-[#1e150e]/10 px-3.5 py-1.5 text-xs font-medium">Refresh</button>
-          <span className="text-xs text-[#8c7a60] tabular-nums">{room.moveCount} moves · {room.status} · {room.scores ? `${room.scores.p1}-${room.scores.p2}` : ""}</span>
-          <button onClick={handleLeave} className="rounded-full bg-[#1e150e] text-[#fdf8ec] px-3.5 py-1.5 text-xs font-semibold">Leave</button>
+        <div className="shrink-0 flex items-center justify-between gap-2 pt-1 sm:pt-2 border-t border-[#1e150e]/5">
+          <button onClick={fetchRoom} className="rounded-full bg-white border border-[#1e150e]/10 px-3 py-1.5 text-[11px] sm:text-xs font-medium">Refresh</button>
+          <span className="text-[11px] sm:text-xs text-[#8c7a60] tabular-nums truncate">{room.moveCount} moves · {room.scores ? `${room.scores.p1}-${room.scores.p2}${room.scores.draws ? ` · ${room.scores.draws}d` : ""}` : room.status}</span>
+          <button onClick={handleLeave} className="rounded-full bg-[#1e150e] text-[#fdf8ec] px-3 py-1.5 text-[11px] sm:text-xs font-semibold">Leave</button>
         </div>
       </div>
       <NameModal

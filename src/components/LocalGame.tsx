@@ -64,49 +64,54 @@ export default function LocalGame({ p1Name, p2Name, muted }: Props) {
   const names = { 1: p1Name, 2: p2Name } as const;
 
   return (
-    <div className="w-full max-w-[560px] mx-auto px-4 pb-8">
-      {/* players - minimal */}
-      <div className="grid grid-cols-[1fr_auto_1fr] gap-3 items-center mb-4">
+    <div className="flex-1 min-h-0 flex flex-col w-full max-w-[560px] mx-auto px-3 sm:px-4 overflow-hidden">
+      {/* players - compact */}
+      <div className="grid grid-cols-[1fr_auto_1fr] gap-2 sm:gap-3 items-center shrink-0">
         {[1, 2].map((n) => {
           const pn = n as 1 | 2;
           const active = current === pn && !winner;
           const won = winner === pn;
           return (
-            <div key={n} className={`rounded-[16px] border px-3 py-3 flex items-center gap-3 ${active ? "bg-white border-[#1e150e]/15 shadow-sm" : "bg-white/70 border-[#1e150e]/10"} ${won ? "ring-1 ring-[#1e150e]" : ""}`}>
-              <div className={`h-9 w-9 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0 ${pn === 1 ? "bg-[#dc2626]" : "bg-[#5cc87a]"}`}>{pn}</div>
+            <div key={n} className={`rounded-[14px] border px-2.5 sm:px-3 py-2 sm:py-2.5 flex items-center gap-2 sm:gap-3 ${active ? "bg-white border-[#1e150e]/15 shadow-sm" : "bg-white/70 border-[#1e150e]/10"} ${won ? "ring-1 ring-[#1e150e]" : ""}`}>
+              <div className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${pn === 1 ? "bg-[#dc2626]" : "bg-[#5cc87a]"}`}>{pn}</div>
               <div className="min-w-0 flex-1">
-                <div className="text-[13px] font-semibold leading-none truncate flex items-center gap-1.5">
-                  {names[pn]} {active && <span className="h-1.5 w-1.5 rounded-full bg-[#1e150e] opacity-70" />}
+                <div className="text-[12px] sm:text-[13px] font-semibold leading-none truncate flex items-center gap-1">
+                  {names[pn]} {active && <span className="h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full bg-[#1e150e] opacity-70" />}
                 </div>
-                <div className="text-xs text-[#8c7a60] tabular-nums">{pn === 1 ? scores.p1 : scores.p2} wins</div>
+                <div className="text-[11px] sm:text-xs text-[#8c7a60] tabular-nums">{pn === 1 ? scores.p1 : scores.p2} wins</div>
               </div>
-              {won && <span className="text-sm">—</span>}
             </div>
           );
         })}
-        <div className="text-[11px] font-semibold tracking-widest text-[#8c7a60]">VS</div>
+        <div className="text-center shrink-0">
+          <div className="text-[10px] sm:text-[11px] font-semibold tracking-widest text-[#8c7a60]">VS</div>
+          <div className="text-[10px] text-[#8c7a60] tabular-nums">{scores.draws ? `${scores.draws}d` : ""}</div>
+        </div>
       </div>
-      <div className="text-center text-xs text-[#8c7a60] mb-3 tabular-nums">{scores.draws} draws</div>
 
-      <AnimatePresence mode="wait">
-        {!winner ? (
-          <motion.div key={current} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mb-3 flex justify-center">
-            <div className={`inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm font-semibold border ${current === 1 ? "bg-[#dc2626]/10 border-[#dc2626]/20 text-[#7f1d1d]" : "bg-[#5cc87a]/10 border-[#5cc87a]/20 text-[#14532d]"}`}>
-              <span className={`h-2 w-2 rounded-full ${current === 1 ? "bg-[#dc2626]" : "bg-[#5cc87a]"}`} /> {names[current]} to play
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div key="w" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`mb-3 rounded-[14px] px-4 py-3 text-center text-sm font-semibold border ${winner === "draw" ? "bg-white border-[#1e150e]/10" : winner === 1 ? "bg-[#dc2626]/10 border-[#dc2626]/15 text-[#7f1d1d]" : "bg-[#5cc87a]/10 border-[#5cc87a]/15 text-[#14532d]"}`}>
-            {winner === "draw" ? "Draw — well matched." : `${names[winner]} wins.`}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div className="mt-2 sm:mt-3 shrink-0">
+        <AnimatePresence mode="wait">
+          {!winner ? (
+            <motion.div key={current} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex justify-center">
+              <div className={`inline-flex items-center gap-1.5 sm:gap-2 rounded-full px-3 py-1 text-[12px] sm:text-sm font-semibold border ${current === 1 ? "bg-[#dc2626]/10 border-[#dc2626]/20 text-[#7f1d1d]" : "bg-[#5cc87a]/10 border-[#5cc87a]/20 text-[#14532d]"}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${current === 1 ? "bg-[#dc2626]" : "bg-[#5cc87a]"}`} /> {names[current]} to play<span className="opacity-60 hidden sm:inline">· drag to aim</span>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div key="w" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`rounded-[12px] px-3 py-2 text-center text-[13px] sm:text-sm font-semibold border ${winner === "draw" ? "bg-white border-[#1e150e]/10" : winner === 1 ? "bg-[#dc2626]/10 border-[#dc2626]/15 text-[#7f1d1d]" : "bg-[#5cc87a]/10 border-[#5cc87a]/15 text-[#14532d]"}`}>
+              {winner === "draw" ? "Draw — well matched." : `${names[winner]} wins.`}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
-      <GameBoard board={board} currentPlayer={current} winningLine={line} onColumnClick={handleColumn} disabled={!!winner} lastMove={lastMove} />
+      <div className="flex-1 min-h-0 flex items-center justify-center py-1 sm:py-2">
+        <GameBoard board={board} currentPlayer={current} winningLine={line} onColumnClick={handleColumn} disabled={!!winner} lastMove={lastMove} />
+      </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-2">
-        <button onClick={handleUndo} disabled={!!winner || moveHistory.length === 0} className="rounded-full py-3 bg-white border border-[#1e150e]/12 font-medium text-sm disabled:opacity-30 active:scale-[0.99]">Undo</button>
-        <button onClick={resetBoard} className="rounded-full py-3 bg-[#1e150e] text-[#fdf8ec] font-semibold text-sm active:scale-[0.99]">{winner ? "Play again" : "Reset board"}</button>
+      <div className="grid grid-cols-2 gap-2 shrink-0 pt-1 sm:pt-2 border-t border-[#1e150e]/5 pb-1">
+        <button onClick={handleUndo} disabled={!!winner || moveHistory.length === 0} className="rounded-full py-2.5 sm:py-3 bg-white border border-[#1e150e]/12 font-medium text-[13px] sm:text-sm disabled:opacity-30 active:scale-[0.99]">Undo</button>
+        <button onClick={resetBoard} className="rounded-full py-2.5 sm:py-3 bg-[#1e150e] text-[#fdf8ec] font-semibold text-[13px] sm:text-sm active:scale-[0.99]">{winner ? "Play again" : "Reset"}</button>
       </div>
     </div>
   );
