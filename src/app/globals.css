@@ -1,34 +1,74 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a12;
-  --foreground: #fafafa;
+  --background: #fdf8ec;
+  --foreground: #1e150e;
+  --cream: #fdf8ec;
+  --cream-2: #f5ead1;
+  --line: #e9ddd0;
+  --line-strong: #d9c7a8;
+  --ink: #1e150e;
+  --muted: #8c7a60;
+  --red: #dc2626;
+  --red-2: #b91c1c;
+  --green: #5cc87a;
+  --green-2: #3aa85c;
+  --terracotta: #dc2626;
+  --terracotta-2: #b91c1c;
+  --teal: #5cc87a;
+  --teal-2: #3aa85c;
+  --mustard: #d9a441;
+  --paper: #fffe fb;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-cream: var(--cream);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-terracotta: var(--terracotta);
+  --color-teal: var(--teal);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-fraunces);
+  --font-space: var(--font-space);
+}
+
+* {
+  font-variant-ligatures: common-ligatures;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
   overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeLegibility;
 }
 
-/* custom scrollbar hide */
+/* subtle paper grain */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  z-index: -1;
+}
+
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-@keyframes float {
-  0%,100% { transform: translateY(0px) }
-  50% { transform: translateY(-6px) }
-}
 @keyframes pulse-glow {
-  0%,100% { opacity: 0.8 }
+  0%,100% { opacity: 0.9 }
   50% { opacity: 1 }
+}
+
+/* retro focus ring */
+*:focus-visible {
+  outline: 2px solid var(--terracotta);
+  outline-offset: 2px;
 }

@@ -4,30 +4,24 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function NameModal({ open, onClose, onSave, initialName }: { open: boolean; onClose?: () => void; onSave: (name: string) => void; initialName: string }) {
   const [name, setName] = useState(initialName);
-
   useEffect(() => setName(initialName), [initialName, open]);
 
   return (
     <AnimatePresence>
       {open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4 sm:p-6 bg-black/70 backdrop-blur-md"
-        >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4 sm:p-6 bg-[#1e150e]/30 backdrop-blur-[6px]">
           <motion.div
-            initial={{ y: 80, opacity: 0, scale: 0.97 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 40, opacity: 0 }}
-            transition={{ type: "spring", damping: 22, stiffness: 300 }}
-            className="w-full max-w-sm rounded-[28px] bg-[#1a1b2e] border border-white/10 p-6 shadow-2xl"
+            initial={{ y: 24, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 12, opacity: 0 }}
+            transition={{ type: "spring", damping: 24, stiffness: 320 }}
+            className="w-full max-w-sm rounded-[20px] bg-[#fffeFB] border border-[#1e150e]/10 p-5 shadow-[0_20px_60px_rgba(30,21,14,0.18)]"
           >
-            <div className="flex items-center gap-3 mb-5">
-              <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-xl">👤</div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-9 w-9 rounded-full bg-[#1e150e] text-[#fdf8ec] flex items-center justify-center text-[13px] font-bold">Aa</div>
               <div>
-                <h2 className="font-[family-name:var(--font-fredoka)] text-xl font-bold leading-none">Your name</h2>
-                <p className="text-sm text-white/60">This stays on your device</p>
+                <h2 className="font-[family-name:var(--font-fraunces)] text-[18px] font-bold leading-none tracking-tight">Your display name</h2>
+                <p className="text-[13px] text-[#8c7a60]">Saved on this device</p>
               </div>
             </div>
             <input
@@ -36,26 +30,23 @@ export default function NameModal({ open, onClose, onSave, initialName }: { open
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Aryan"
               maxLength={20}
-              className="w-full rounded-2xl bg-white/[0.07] border border-white/10 px-4 py-3.5 text-[16px] outline-none focus:border-violet-500 focus:bg-white/[0.09] placeholder:text-white/30"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && name.trim()) onSave(name.trim());
-              }}
+              className="w-full rounded-[14px] bg-[#fdf8ec] border border-[#1e150e]/10 px-4 py-3.5 text-[16px] outline-none focus:border-[#dc2626]/50 focus:bg-white placeholder:text-[#8c7a60]/60"
+              onKeyDown={(e) => { if (e.key === "Enter" && name.trim()) onSave(name.trim()); }}
             />
-            <div className="mt-5 flex gap-3">
+            <div className="mt-4 flex gap-2.5">
               {onClose && (
-                <button onClick={onClose} className="flex-1 rounded-2xl py-3.5 bg-white/10 font-semibold">
+                <button onClick={onClose} className="flex-1 rounded-full py-3 bg-[#1e150e]/5 border border-[#1e150e]/10 font-semibold text-sm">
                   Cancel
                 </button>
               )}
               <button
                 disabled={!name.trim()}
                 onClick={() => onSave(name.trim())}
-                className="flex-1 rounded-2xl py-3.5 bg-gradient-to-br from-violet-600 to-fuchsia-600 font-bold shadow-lg shadow-violet-600/20 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition"
+                className="flex-1 rounded-full py-3 bg-[#1e150e] text-[#fdf8ec] font-bold text-sm disabled:opacity-40 active:scale-[0.99] transition"
               >
-                Save & Play
+                Save
               </button>
             </div>
-            <p className="mt-3 text-center text-xs text-white/40">You can change it anytime from the menu</p>
           </motion.div>
         </motion.div>
       )}

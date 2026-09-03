@@ -20,8 +20,8 @@ export async function POST(req: NextRequest) {
     if (token) {
       const existing = room.players.find((p) => p.token === token);
       if (existing) {
-        // update name maybe
         existing.name = name;
+        existing.lastSeen = Date.now();
         room.updatedAt = Date.now();
         await setRoom(room);
         const idx = room.players.indexOf(existing);
@@ -32,15 +32,24 @@ export async function POST(req: NextRequest) {
     if (room.players.length >= 2) {
       return NextResponse.json({ error: "Room full" }, { status: 400 });
     }
-    if (room.status === "finished") {
-      // allow joining finished? still full
+    // allow re-joining an abandoned/finished room if a seat is free (opponent left)
+    if (room.status === "finished" && room.players.length >= 2) {
       return NextResponse.json({ error: "Game already finished, ask host to rematch" }, { status: 400 });
     }
 
     token = token || uuid();
-    const newPlayer = { id: playerId, name, token, joinedAt: Date.now() };
+    const newPlayer = { id: playerId, name, token, joinedAt: Date.now(), lastSeen: Date.now() };
     room.players.push(newPlayer);
-    if (room.players.length === 2) room.status = "playing";
+    if (room.players.length === 2) {
+      // if room was abandoned, resurrect to playing
+      if (room.status === "abandoned") {
+        room.status = "playing";
+        room.abandonedAt = undefined;
+        room.leftPlayers = [];
+      } else {
+        room.status = "playing";
+      }
+    }
     room.updatedAt = Date.now();
     await setRoom(room);
 
