@@ -37,7 +37,7 @@ export default function Home() {
       <header className="sticky top-0 z-30 backdrop-blur-[10px] bg-[#fdf8ec]/85 border-b border-[#1e150e]/8">
         <div className="max-w-[580px] mx-auto w-full px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-[#1e150e] text-[#fdf8ec] flex items-center justify-center font-[family-name:var(--font-fraunces)] font-bold text-[14px]">4</div>
+            <img src="/logo.png" alt="Vibe Four" width={32} height={32} className="h-8 w-8 rounded-full border border-[#1e150e]/10 object-contain bg-white" />
             <div className="leading-none">
               <div className="font-[family-name:var(--font-fraunces)] font-bold text-[16px] tracking-tight">VIBE FOUR</div>
               <div className="text-[10px] tracking-[0.16em] font-semibold text-[#8c7a60] uppercase">Connect Four</div>
