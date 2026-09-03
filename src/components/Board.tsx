@@ -32,50 +32,38 @@ export default function Board({ board, currentPlayer, winningLine, onColumnClick
     return Math.max(0, Math.min(COLS - 1, col));
   }, []);
 
-  const handlePointerMove = useCallback((e: React.PointerEvent | React.TouchEvent) => {
+  const lastClickAt = useRef(0);
+  const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if (disabled) return;
-    let clientX: number | null = null;
-    if ("touches" in e) {
-      if (e.touches.length === 0) return;
-      clientX = e.touches[0].clientX;
-    } else {
-      clientX = (e as React.PointerEvent).clientX;
-    }
-    if (clientX === null) return;
-    const col = getColFromX(clientX);
+    const col = getColFromX(e.clientX);
     if (col !== null && board[0][col] === 0) {
       setHoverCol(col);
     } else if (col !== null && board[0][col] !== 0) {
-      // column full - don't highlight but still show as disabled
       setHoverCol(null);
     }
   }, [disabled, board, getColFromX]);
 
   const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (disabled) return;
     isPointerDown.current = true;
-    (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+    try { (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId); } catch {}
     handlePointerMove(e);
-  }, [handlePointerMove]);
+  }, [handlePointerMove, disabled]);
 
   const handlePointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    if (!disabled && hoverCol !== null && board[0][hoverCol] === 0) {
+    if (!isPointerDown.current) return;
+    isPointerDown.current = false;
+    if (disabled || hoverCol === null || board[0][hoverCol] !== 0) return;
+    const now = Date.now();
+    if (now - lastClickAt.current < 400) return;
+    lastClickAt.current = now;
+    // recompute col from up position to support drag-release at different col
+    const col = getColFromX(e.clientX) ?? hoverCol;
+    if (col !== null && board[0][col] === 0) {
+      onColumnClick(col);
+    } else if (board[0][hoverCol] === 0) {
       onColumnClick(hoverCol);
     }
-    isPointerDown.current = false;
-    // keep highlight briefly then clear? keep until leave
-  }, [disabled, hoverCol, board, onColumnClick]);
-
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (!disabled && hoverCol !== null && board[0][hoverCol] === 0) {
-      // tap on lift
-      const touch = e.changedTouches[0];
-      if (touch) {
-        const col = getColFromX(touch.clientX);
-        if (col !== null && col === hoverCol) onColumnClick(col);
-      }
-    }
-    // don't clear immediately - leave highlight for moment
-    setTimeout(() => setHoverCol(null), 800);
   }, [disabled, hoverCol, board, onColumnClick, getColFromX]);
 
   return (
@@ -115,9 +103,8 @@ export default function Board({ board, currentPlayer, winningLine, onColumnClick
         onPointerMove={handlePointerMove}
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
-        onPointerLeave={() => setHoverCol(null)}
-        onTouchMove={handlePointerMove}
-        onTouchEnd={handleTouchEnd}
+        onPointerLeave={() => { if (!isPointerDown.current) setHoverCol(null); }}
+        onPointerCancel={() => { isPointerDown.current = false; setHoverCol(null); }}
         style={{ touchAction: "none" }}
       >
 
