@@ -1,0 +1,10 @@
+{
+  "name": "VIBE FOUR",
+  "short_name": "VIBE4",
+  "description": "Connect 4 reimagined - pair by code and play",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a12",
+  "theme_color": "#7c3aed",
+  "icons": [{ "src": "/vercel.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
