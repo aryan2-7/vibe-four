@@ -59,6 +59,12 @@ body::before {
   z-index: -1;
 }
 
+/* SVG turbulence is surprisingly expensive on mobile GPUs while playing. */
+@media (max-width: 640px) {
+  body::before { display: none; }
+  body { text-rendering: optimizeSpeed; }
+}
+
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -75,7 +81,13 @@ body::before {
   100% { transform: translateY(0); opacity: 1; }
 }
 .animate-disc-drop {
-  animation: disc-drop 0.3s cubic-bezier(0.3, 0.7, 0.4, 1);
+  animation: disc-drop 0.3s cubic-bezier(0.3, 0.7, 0.4, 1) both;
+  will-change: transform, opacity;
+}
+@media (max-width: 640px) {
+  .animate-disc-drop {
+    animation-duration: 0.24s;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .animate-disc-drop { animation: none; }

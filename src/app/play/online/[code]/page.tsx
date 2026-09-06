@@ -28,6 +28,9 @@ export default function OnlineGamePage() {
   const [showNameModal, setShowNameModal] = useState(false);
   const [joining, setJoining] = useState(false);
   const [pendingName, setPendingName] = useState("");
+  const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pollInFlightRef = useRef(false);
+  const lastRoomRef = useRef<FetchRoom | null>(null);
 
   // derived token helper
   const getToken = () => (typeof window !== "undefined" ? localStorage.getItem(`vibe-four:token:${code}`) || "" : "");
@@ -54,6 +57,18 @@ export default function OnlineGamePage() {
       }
       if (!res.ok) throw new Error(data.error || "Room not found");
       const r = data.room as FetchRoom;
+      const previous = lastRoomRef.current;
+      if (previous && r.moveCount > previous.moveCount) {
+        for (let row = 0; row < r.board.length; row++) {
+          for (let col = 0; col < r.board[row].length; col++) {
+            if (r.board[row][col] !== previous.board[row][col]) {
+              setLastMove({ row, col });
+              break;
+            }
+          }
+        }
+      }
+      lastRoomRef.current = r;
       // detect leave after you left vs opponent left
       if (data.left) {
         setLeftNotice(true);
@@ -79,19 +94,43 @@ export default function OnlineGamePage() {
     }
   }, [code]);
 
-  // polling with visibility + heartbeat
+  // Poll with one request at a time. setInterval can pile up requests when a
+  // phone changes networks or a serverless response is slow.
   useEffect(() => {
-    fetchRoom();
-    const id = setInterval(fetchRoom, 1400);
+    let stopped = false;
+    const poll = async () => {
+      if (stopped || pollInFlightRef.current) return;
+      pollInFlightRef.current = true;
+      try {
+        await fetchRoom();
+      } finally {
+        pollInFlightRef.current = false;
+        if (!stopped) {
+          pollTimerRef.current = setTimeout(poll, document.hidden ? 2500 : 700);
+        }
+      }
+    };
+
+    poll();
     const hb = setInterval(async () => {
       const tok = getToken();
       if (!tok || document.hidden) return;
       try { await fetch(`/api/room/${code}/heartbeat`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: tok }) }); } catch {}
     }, 4500);
 
-    const onVis = () => { if (!document.hidden) fetchRoom(); };
+    const onVis = () => {
+      if (!document.hidden) {
+        if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
+        poll();
+      }
+    };
     document.addEventListener("visibilitychange", onVis);
-    return () => { clearInterval(id); clearInterval(hb); document.removeEventListener("visibilitychange", onVis); };
+    return () => {
+      stopped = true;
+      if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
+      clearInterval(hb);
+      document.removeEventListener("visibilitychange", onVis);
+    };
   }, [fetchRoom, code]);
 
   // auto-join via link: if visitor opens /play/online/CODE without token, prompt name and join
@@ -180,7 +219,9 @@ export default function OnlineGamePage() {
       const res = await fetch(`/api/room/${code}/move`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: tok, col }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Move failed");
-      setRoom({ ...data.room, yourPlayerNumber: room.yourPlayerNumber } as FetchRoom);
+      const nextRoom = { ...data.room, yourPlayerNumber: room.yourPlayerNumber } as FetchRoom;
+      lastRoomRef.current = nextRoom;
+      setRoom(nextRoom);
       if (typeof data.row === "number") setLastMove({ row: data.row, col });
       sfxDrop(muted); triggerHaptic(16);
       if (data.room.winner && data.room.winner !== "draw") { sfxWin(muted); confetti({ particleCount: 70, spread: 70, origin: { y: 0.68 } }); }
@@ -195,7 +236,9 @@ export default function OnlineGamePage() {
       const res = await fetch(`/api/room/${code}/rematch`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: tok }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      setRoom(data.room as FetchRoom); setLastMove(null); lastWinRef.current = null;
+      const nextRoom = data.room as FetchRoom;
+      lastRoomRef.current = nextRoom;
+      setRoom(nextRoom); setLastMove(null); lastWinRef.current = null;
     } catch (e: unknown) { setError(e instanceof Error ? e.message : "Rematch failed"); }
   }
 
