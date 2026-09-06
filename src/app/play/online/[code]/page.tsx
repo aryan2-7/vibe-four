@@ -30,6 +30,7 @@ export default function OnlineGamePage() {
   const [pendingName, setPendingName] = useState("");
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pollInFlightRef = useRef(false);
+  const lastRoomRef = useRef<FetchRoom | null>(null);
 
   // derived token helper
   const getToken = () => (typeof window !== "undefined" ? localStorage.getItem(`vibe-four:token:${code}`) || "" : "");
@@ -56,6 +57,18 @@ export default function OnlineGamePage() {
       }
       if (!res.ok) throw new Error(data.error || "Room not found");
       const r = data.room as FetchRoom;
+      const previous = lastRoomRef.current;
+      if (previous && r.moveCount > previous.moveCount) {
+        for (let row = 0; row < r.board.length; row++) {
+          for (let col = 0; col < r.board[row].length; col++) {
+            if (r.board[row][col] !== previous.board[row][col]) {
+              setLastMove({ row, col });
+              break;
+            }
+          }
+        }
+      }
+      lastRoomRef.current = r;
       // detect leave after you left vs opponent left
       if (data.left) {
         setLeftNotice(true);
@@ -206,7 +219,9 @@ export default function OnlineGamePage() {
       const res = await fetch(`/api/room/${code}/move`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: tok, col }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Move failed");
-      setRoom({ ...data.room, yourPlayerNumber: room.yourPlayerNumber } as FetchRoom);
+      const nextRoom = { ...data.room, yourPlayerNumber: room.yourPlayerNumber } as FetchRoom;
+      lastRoomRef.current = nextRoom;
+      setRoom(nextRoom);
       if (typeof data.row === "number") setLastMove({ row: data.row, col });
       sfxDrop(muted); triggerHaptic(16);
       if (data.room.winner && data.room.winner !== "draw") { sfxWin(muted); confetti({ particleCount: 70, spread: 70, origin: { y: 0.68 } }); }
@@ -221,7 +236,9 @@ export default function OnlineGamePage() {
       const res = await fetch(`/api/room/${code}/rematch`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: tok }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      setRoom(data.room as FetchRoom); setLastMove(null); lastWinRef.current = null;
+      const nextRoom = data.room as FetchRoom;
+      lastRoomRef.current = nextRoom;
+      setRoom(nextRoom); setLastMove(null); lastWinRef.current = null;
     } catch (e: unknown) { setError(e instanceof Error ? e.message : "Rematch failed"); }
   }
 
