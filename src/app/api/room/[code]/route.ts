@@ -1,19 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRoom, sanitizeRoom, touchRoom } from "@/lib/roomStore";
+import { getRoom, sanitizeRoom } from "@/lib/roomStore";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
   const token = req.nextUrl.searchParams.get("token") || undefined;
 
-  // heartbeat touch if token present
-  let room = null as Awaited<ReturnType<typeof getRoom>>;
-  if (token) {
-    room = await touchRoom(code, token);
-    if (!room) return NextResponse.json({ error: "Room not found", deleted: true }, { status: 410 });
-  } else {
-    room = await getRoom(code);
-    if (!room) return NextResponse.json({ error: "Room not found", deleted: true }, { status: 410 });
-  }
+  // Reads must stay read-only. Heartbeats update lastSeen separately so a
+  // fast polling loop does not turn every board refresh into a storage write.
+  const room = await getRoom(code);
+  if (!room) return NextResponse.json({ error: "Room not found", deleted: true }, { status: 410 });
 
   // if the requester was the one who left, inform them room is deleted for them
   if (token && !room.players.some((p) => p.token === token)) {

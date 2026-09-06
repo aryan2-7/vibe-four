@@ -59,6 +59,12 @@ body::before {
   z-index: -1;
 }
 
+/* SVG turbulence is surprisingly expensive on mobile GPUs while playing. */
+@media (max-width: 640px) {
+  body::before { display: none; }
+  body { text-rendering: optimizeSpeed; }
+}
+
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 

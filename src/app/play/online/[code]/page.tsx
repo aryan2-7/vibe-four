@@ -28,6 +28,8 @@ export default function OnlineGamePage() {
   const [showNameModal, setShowNameModal] = useState(false);
   const [joining, setJoining] = useState(false);
   const [pendingName, setPendingName] = useState("");
+  const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pollInFlightRef = useRef(false);
 
   // derived token helper
   const getToken = () => (typeof window !== "undefined" ? localStorage.getItem(`vibe-four:token:${code}`) || "" : "");
@@ -79,19 +81,43 @@ export default function OnlineGamePage() {
     }
   }, [code]);
 
-  // polling with visibility + heartbeat
+  // Poll with one request at a time. setInterval can pile up requests when a
+  // phone changes networks or a serverless response is slow.
   useEffect(() => {
-    fetchRoom();
-    const id = setInterval(fetchRoom, 1400);
+    let stopped = false;
+    const poll = async () => {
+      if (stopped || pollInFlightRef.current) return;
+      pollInFlightRef.current = true;
+      try {
+        await fetchRoom();
+      } finally {
+        pollInFlightRef.current = false;
+        if (!stopped) {
+          pollTimerRef.current = setTimeout(poll, document.hidden ? 2500 : 700);
+        }
+      }
+    };
+
+    poll();
     const hb = setInterval(async () => {
       const tok = getToken();
       if (!tok || document.hidden) return;
       try { await fetch(`/api/room/${code}/heartbeat`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: tok }) }); } catch {}
     }, 4500);
 
-    const onVis = () => { if (!document.hidden) fetchRoom(); };
+    const onVis = () => {
+      if (!document.hidden) {
+        if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
+        poll();
+      }
+    };
     document.addEventListener("visibilitychange", onVis);
-    return () => { clearInterval(id); clearInterval(hb); document.removeEventListener("visibilitychange", onVis); };
+    return () => {
+      stopped = true;
+      if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
+      clearInterval(hb);
+      document.removeEventListener("visibilitychange", onVis);
+    };
   }, [fetchRoom, code]);
 
   // auto-join via link: if visitor opens /play/online/CODE without token, prompt name and join
